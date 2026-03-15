@@ -136,8 +136,6 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
 	task1HeartBeat++;
-	if(flipEnable)
-		flipHeartBeat++;
 	if(gameEnable)
 		gameHeartBeat++;
 	if(timerEnable)

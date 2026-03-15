@@ -45,8 +45,7 @@ void shuffleCards(char* cards, int len) {
     // Shuffle the array
 	for (i = 0; i < len; i++)
 	{
-		Delay(71);
-		random = (cnt % len + random) % len;
+		random = (TIM5_Random(len) + random) % len;
 		temp = cards[i];
 		cards[i] = cards[random];
 		cards[random] = temp;
@@ -124,9 +123,9 @@ void drawInstructions(void)
 	for (i = 0; i < 19; i++)
 			IERG3810_TFTLCD_ShowChar(48 + charWidth * i, 100, Ins_Right[i], 0xFFFF, 0x0000);
 	for (i = 0; i < 21; i++)
-			IERG3810_TFTLCD_ShowChar(43 + charWidth * i, 100, Ins_Slc[i], 0xFFFF, 0x0000);
-	for(i=0;i<300;i++)
-		TIM7_General_Delay(10000);
+			IERG3810_TFTLCD_ShowChar(43 + charWidth * i, 50, Ins_Slc[i], 0xFFFF, 0x0000);
+	TIM7_General_Delay(1);
+	TIM7_General_Delay(29999);
 	IERG3810_TFTLCD_FillRectangle(0x0000, 10, 220, 10, 300);
 }
 void drawTimer(){
@@ -135,19 +134,20 @@ void drawTimer(){
 	IERG3810_TFTLCD_FillRectangle(0x07E0, 10, 220 - timepass, 300, 10);
 	
 	if(difficulty == 1)
-		timescale = 100;
+		timescale = 2000;
 	else if (difficulty == 2)
-		timescale = 150;
+		timescale = 3000;
 	else if (difficulty == 3)
-		timescale = 200;
+		timescale = 4000;
 	if(timepass<220)
 	{
-		if(timerHeartBeat >= timescale)
+		if(!is_TIM6_Game_Timer_Running())
 		{
-			timerHeartBeat=0;
-			timepass+=2;
 			IERG3810_TFTLCD_FillRectangle(0x07E0, 10, 220 - timepass, 300, 10);
 			IERG3810_TFTLCD_FillRectangle(0x0000, 230 - timepass, timepass, 300, 10);
+			timepass+=2;
+			TIM6_Game_Timer_Start(timescale );
+
 			cards_left=0;
 			for(i=0;i<row(difficulty)*col(difficulty);i++)
 			{
@@ -176,23 +176,23 @@ void drawTimer(){
 				to_Page(3);
 			}
 		}
-		}
-		else
-		{	
-			GPIOB->BRR = 1 << 8;
-			GPIOB->BSRR |= 1 << 5;
-			end=0;
-			isGameEnterReleased = 0;
-			x_temp=0;
-			y_temp=0;
-			select=-1;
-			x1 = -1;
-			y1 = -1;
-			x2 = -1;
-			y2 = -1;
-			timepass=0;
-			to_Page(3);
-		}
+	}
+	else
+	{	
+		GPIOB->BRR = 1 << 8;
+		GPIOB->BSRR |= 1 << 5;
+		end=0;
+		isGameEnterReleased = 0;
+		x_temp=0;
+		y_temp=0;
+		select=-1;
+		x1 = -1;
+		y1 = -1;
+		x2 = -1;
+		y2 = -1;
+		timepass=0;
+		to_Page(3);
+	}
 }
 
 
@@ -324,7 +324,7 @@ void drawCards(int difficulty){
 						//select
 						else if(i == x1 && j==y1)
 						{	
-							IERG3810_TFTLCD_ShowChar(offset_x(difficulty) + i*interval_x(difficulty), offset_y(difficulty) + j*interval_x(difficulty), cards[i+j*row(difficulty)], 0x0000, 0xF800);
+							IERG3810_TFTLCD_ShowChar(offset_x(difficulty) + i*interval_x(difficulty), offset_y(difficulty) + j*interval_x(difficulty), cards[i+j*row(difficulty)], 0xFFFF, 0xF00F);
 						}
 						else if(i == x2 && j==y2)
 						{	
@@ -351,13 +351,8 @@ void flipCard(int x, int y){
 		x2 = x;
 		y2 = y;
 		//determine if match
-		flipEnable = 1;
-		flipHeartBeat = 0;
-		while(flipHeartBeat<75)
-		{	
-			IERG3810_TFTLCD_ShowChar(offset_x(difficulty) + x2*interval_x(difficulty), offset_y(difficulty) + y2*interval_x(difficulty), cards[x2+y2*row(difficulty)], 0x0000, 0xFFE0);
-		}
-		flipEnable = 0;
+		IERG3810_TFTLCD_ShowChar(offset_x(difficulty) + x2*interval_x(difficulty), offset_y(difficulty) + y2*interval_x(difficulty), cards[x2+y2*row(difficulty)], 0x0000, 0xFFE0);
+		TIM7_General_Delay(10000);
 		if(checkCards(x1, y1, x2, y2) && (x1 != x2 || y1 != y2))
 		{
 			//clear and update
@@ -385,13 +380,8 @@ void flipCard(int x, int y){
 	{
 		x1 = x;
 		y1 = y;
-		flipEnable = 1;
-		flipHeartBeat = 0;
-		while(flipHeartBeat<75)
-		{	
-			IERG3810_TFTLCD_ShowChar(offset_x(difficulty) + x1*interval_x(difficulty), offset_y(difficulty) + y1*interval_x(difficulty), cards[x1+y1*row(difficulty)], 0x0000, 0xF800);
-		}
-		flipEnable = 0;
+		IERG3810_TFTLCD_ShowChar(offset_x(difficulty) + x1*interval_x(difficulty), offset_y(difficulty) + y1*interval_x(difficulty), cards[x1+y1*row(difficulty)], 0x0000, 0xF800);
+		TIM7_General_Delay(10000);
 	}
 	//drawCards(difficulty);
 	select = 1 - select;
@@ -513,7 +503,7 @@ void gameController(int difficulty)
 		isGameEnterReleased = 1;
 	}
 
-	if(gameKey != prevGameKey || !is_TIM4_Menu_Timer_Running()) {
+	if(gameKey != prevGameKey || !is_TIM4_Page_Timer_Running()) {
 		if (gameKey == 'u') {
 			if (ifStuck_up(cards_masked, x_temp, y_temp, row(difficulty), col(difficulty)))
 			{
@@ -655,12 +645,12 @@ void gameController(int difficulty)
 		}
 			
 		
-		TIM4_Menu_Timer_Reset();
+		TIM4_Page_Timer_Reset();
 
 		if (gameKey != prevGameKey) {
-			TIM4_Menu_Timer_Start(5000);
+			TIM4_Page_Timer_Start(5000);
 		} else {
-			TIM4_Menu_Timer_Start(1500);
+			TIM4_Page_Timer_Start(1500);
 		}
 
 		prevGameKey = gameKey;

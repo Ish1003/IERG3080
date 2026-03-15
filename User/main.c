@@ -30,8 +30,6 @@ u8 bgColor = 0x0000;
 u8 state=0;
 int difficulty = 1;
 u8 task1HeartBeat;
-u8 flipEnable;
-u8 flipHeartBeat;
 u8 gameEnable;
 u8 gameHeartBeat;
 u8 timerEnable;
@@ -67,7 +65,7 @@ u8 y1 = -1;
 u8 x2 = -1;
 u8 y2 = -1;
 int ifend=0;
-int timepass=0;
+int timepass=-2;
 u8 isGameEnterReleased = 0;
 
 int main(void)
@@ -79,15 +77,13 @@ int main(void)
 	IERG3810_TFTLCD_Init();
 	IERG3810_LED_Init();
 	IERG3810_NVIC_SetPriorityGroup(5);
-	IERG3810_key2_ExtiInit();
-	IERG3810_keyUP_ExtiInit();
-	IERG3810_key0_ExtiInit();
-	IERG3810_key1_ExtiInit();
 
 	TIM2_PS2_Delay_Init_1mhz();
 	TIM3_PS2_Timer_Init_10khz();
-	TIM4_Menu_Timer_Init_10khz();
-	TIM7_General_Delay_Init_1mhz();
+	TIM4_Page_Timer_Init_10khz();
+	TIM5_Random_Generate_Init_72mhz();
+	TIM6_Game_Timer_Init_10khz();
+	TIM7_General_Delay_Init_10khz();
 	IERG3810_PS2key_ExtiInit();
 
 

@@ -53,7 +53,7 @@ void main_menu(void)
 		isEnterReleased = 1;
 	}
 
-	if(menuKey != prevMenuKey || !is_TIM4_Menu_Timer_Running()) {
+	if(menuKey != prevMenuKey || !is_TIM4_Page_Timer_Running()) {
 		if (menuKey == 'u') {
 			tempDiff = (tempDiff + 2) % 3;
 		} else if (menuKey == 'd') {
@@ -61,12 +61,12 @@ void main_menu(void)
 		}
 
 		
-		TIM4_Menu_Timer_Reset();
+		TIM4_Page_Timer_Reset();
 
 		if (menuKey != prevMenuKey) {
-			TIM4_Menu_Timer_Start(5000);
+			TIM4_Page_Timer_Start(5000);
 		} else {
-			TIM4_Menu_Timer_Start(1500);
+			TIM4_Page_Timer_Start(1500);
 		}
 
 		prevMenuKey = menuKey;
