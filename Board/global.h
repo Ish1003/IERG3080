@@ -16,8 +16,6 @@ extern u8 bgColor;
 
 extern u8 task1HeartBeat;
 
-extern u8 flipEnable;
-extern u8 flipHeartBeat;
 
 extern u8 timerEnable;
 extern u8 timerHeartBeat;

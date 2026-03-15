@@ -61,9 +61,9 @@ u8 is_TIM3_PS2_Timer_Running(void) {
 	return (TIM3->CR1 & 1);
 }
 
-// The TIM4 for button selection delay in menu
+// The TIM4 for button selection delay
 // Initialize the TIM4
-void TIM4_Menu_Timer_Init_10khz(void) {
+void TIM4_Page_Timer_Init_10khz(void) {
 	// TIM4, IRQ#30
 	RCC->APB1ENR 	|= 1 << 2;
 	TIM4->PSC		 = 7199;
@@ -79,29 +79,82 @@ void TIM4_IRQHandler(void) {
 }
 
 // Reset TIM4
-void TIM4_Menu_Timer_Reset(void) {
+void TIM4_Page_Timer_Reset(void) {
 	TIM4->CR1	&= 0xFFFFFFFE;
 	TIM4->CNT	 = 0;
 }
 
 // start TIM4
-void TIM4_Menu_Timer_Start(u16 count) {
+void TIM4_Page_Timer_Start(u16 count) {
 	TIM4->CR1	|= 1 << 0;
 	TIM4->ARR	 = count;
 
 }
 
 // check for TIM4 current status
-u8 is_TIM4_Menu_Timer_Running(void) {
+u8 is_TIM4_Page_Timer_Running(void) {
 	return (TIM4->CR1 & 1);
 }
 
+// The TIM5 for random number generateor
+// Initialize the TIM5
+void TIM5_Random_Generate_Init_72mhz(void) {
+	// TIM5, IRQ#50
+	RCC->APB1ENR 	|= 1 << 3;
+	TIM5->ARR		 = 0xFFFF;
+	TIM5->PSC		 = 0;
+	TIM5->DIER		 = 0;
+	TIM5->CR1		|= 1 << 0;
+}
+
+// Random by random seed from TIM5
+int TIM5_Random(u16 max) {
+	srand(TIM5->CNT);
+	return rand() % max;
+}
+
+
+// The TIM6 for delay of game timer
+// Initialize the TIM6
+void TIM6_Game_Timer_Init_10khz(void) {
+	// TIM6, IRQ#54
+	RCC->APB1ENR 	|= 1 << 4;
+	TIM6->PSC		 = 35999;
+	TIM6->DIER		|= 1 << 0;
+	TIM6->CR1		|= 1 << 3;
+	NVIC->IP[54]	 = 0x45;
+	NVIC->ISER[1]	|= 1 << 22;
+}
+
+// interupt handler for TIM6
+void TIM6_IRQHandler(void) {
+	TIM6->SR &= ~(1 << 0);
+}
+
+// Reset TIM6
+void TIM6_Game_timer_Reset(void) {
+	TIM6->CR1	&= 0xFFFFFFFE;
+	TIM6->CNT	 = 0;
+}
+
+// start TIM6
+void TIM6_Game_Timer_Start(u16 count) {
+	TIM6->CR1	|= 1 << 0;
+	TIM6->ARR	 = count;
+
+}
+
+// check for TIM6 current status
+u8 is_TIM6_Game_Timer_Running(void) {
+	return (TIM6->CR1 & 1);
+}
+
 // The TIM7 for delay of general purpose
-// Initialize the TIM3
-void TIM7_General_Delay_Init_1mhz(void) {
+// Initialize the TIM7
+void TIM7_General_Delay_Init_10khz(void) {
 	// TIM7, IRQ#55
 	RCC->APB1ENR 	|= 1 << 5;
-	TIM7->PSC		 = 71;
+	TIM7->PSC		 = 7199;
 	TIM7->DIER		|= 1 << 0;
 	TIM7->CR1		|= 1 << 3;
 	NVIC->IP[55]	 = 0x45;
